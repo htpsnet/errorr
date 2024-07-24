@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>error</title>
+</head>
+<body>
+    <h1>error</h1>
+    <h2>やり直してください</h2>
+    <ul id="dataList"></ul>
+
+    <script>
+        // URLパラメータを取得する関数
+        function getQueryParams() {
+            const params = {};
+            window.location.search.substring(1).split("&").forEach(pair => {
+                const [key, value] = pair.split("=");
+                params[decodeURIComponent(key)] = decodeURIComponent(value.replace(/\+/g, ' '));
+            });
+            return params;
+        }
+
+        // URLパラメータまたはローカルストレージからデータを取得する関数
+        function saveData() {
+            const params = getQueryParams();
+            let storedData = JSON.parse(localStorage.getItem('formData')) || [];
+
+            if (params.name && params.email) {
+                const data = { name: params.name, email: params.email };
+                storedData.push(data);
+                localStorage.setItem('formData', JSON.stringify(storedData));
+
+                // URLを更新してデータを反映
+                const newParams = new URLSearchParams(params).toString();
+                window.history.replaceState({}, '', `${window.location.pathname}?${newParams}`);
+            }
+
+            displayData(storedData);
+        }
+
+        // 保存されたデータを表示する関数
+        function displayData(dataArray) {
+            const dataList = document.getElementById('dataList');
+            dataList.innerHTML = '';
+
+            dataArray.forEach(data => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `名前: ${data.name}, メールアドレス: ${data.email}`;
+                dataList.appendChild(listItem);
+            });
+        }
+
+        // ページが読み込まれたときに保存されたデータを表示する
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedData = JSON.parse(localStorage.getItem('formData')) || [];
+            saveData();
+            displayData(storedData);
+        });
+    </script>
+</body>
+</html>
